@@ -13,9 +13,9 @@ fn main() {
 	mut server := vttp.new_vttp(log_warn: false, path: "/tmp/ragnarok.sock", name: "ragnarok.v")
 	
 	db = mysql.Connection{
-		username: 'username'
-		password: 'password'
-		dbname: 'ragnarok'
+		username: sql_username
+		password: sql_pass
+		dbname: sql_table
 	}
 
 	db.connect() or {
