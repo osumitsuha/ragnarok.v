@@ -3,15 +3,16 @@ module managers
 import mysql
 
 __global (
-	db       mysql.Connection
-	players  map[string]Player
-	matches  map[string]Match
-	channels map[string]Channel
+	db       	mysql.Connection
+	players  	map[string]Player
+	matches  	map[string]Match
+	channels 	map[string]Channel
+	crypt_cache map[string]string
 )
 
 pub fn get_user(usafe string) ?Player {
 	if usafe !in players {
-		r := db.query("SELECT username, id, privileges, passhash FROM users WHERE safe_username = '$usafe'") or {
+		r := db.query("SELECT username, id, privileges, password FROM users WHERE usafe = '$usafe'") or {
 			return err
 		}
 
@@ -20,7 +21,7 @@ pub fn get_user(usafe string) ?Player {
 		ret := Player{
 			id: res["id"].int()
 			username: res["username"]
-			passhash: res["passhash"].bytes()
+			passhash: res["password"].bytes()
 			privileges: res["privileges"].int()
 		}
 		unsafe { r.free() }

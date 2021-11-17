@@ -1,0 +1,9 @@
+# Binaries for programs and plugins
+.vscode
+ragnarok
+*.exe
+*.exe~
+*.so
+*.dylib
+*.dll
+config.v
