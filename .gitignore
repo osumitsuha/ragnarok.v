@@ -7,3 +7,5 @@ ragnarok
 *.dylib
 *.dll
 config.v
+lib/libbcrypt
+ueda
