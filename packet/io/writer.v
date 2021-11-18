@@ -1,4 +1,6 @@
-module osustream
+module io
+
+import constants { Packets }
 
 struct Stream {
 mut:
@@ -91,46 +93,35 @@ fn (mut s Stream) write_i32_l(vals []int) {
 
 type PacketVal = byte | i16 | i64 | i8 | int | string | u16 | u32 | u64
 
-// writer.make_packet(4, "string", 0, u32(1))
-pub fn make_packet(packet int, values ...PacketVal) []byte {
+// io.make_packet<PacketStruct>(.packet, PacketStructData)
+pub fn make_packet<T>(packet Packets, data &T) []byte {
 	mut s := Stream{}
 
 	s.write_u16(u16(packet))
 	s.write_u8(0)
 	s.write_i32(0)
 
-	for v in values {
-		match v.type_name() {
-			'u8' {
-				s.write_u8(v as byte)
-			}
-			'i8' {
-				s.write_i8(v as i8)
-			}
-			'u16' {
-				s.write_u16(v as u16)
-			}
-			'i16' {
-				s.write_i16(v as i16)
-			}
-			'u32' {
-				s.write_u32(v as u32)
-			}
-			'int' {
-				s.write_i32(v as int)
-			}
-			'u64' {
-				s.write_u64(v as u64)
-			}
-			'i64' {
-				s.write_i64(v as i64)
-			}
-			'string' {
-				s.write_str(v as string)
-			}
-			else {
-				panic('get real')
-			}
+	$for field in T.fields {
+		$if field.typ is u8 {
+			s.write_u8(data.$(field.name))
+		} $else $if field.typ is i8 {
+			s.write_i8(data.$(field.name))
+		} $else $if field.typ is u16 {
+			s.write_u16(data.$(field.name))
+		} $else $if field.typ is i16 {
+			s.write_i16(data.$(field.name))
+		} $else $if field.typ is u32 {
+			s.write_u32(data.$(field.name))
+		} $else $if field.typ is int {
+			s.write_i32(data.$(field.name))
+		} $else $if field.typ is u64 {
+			s.write_u64(data.$(field.name))
+		} $else $if field.typ is i64 {
+			s.write_i64(data.$(field.name))
+		} $else $if field.typ is string {
+			s.write_str(data.$(field.name))
+		} $else {
+			panic('${field.typ} not implemented')
 		}
 	}
 

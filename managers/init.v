@@ -16,13 +16,17 @@ pub fn get_user(usafe string) ?Player {
 			return err
 		}
 
-		res := r.maps()[0]
+		mapped := r.maps()
+
+		if mapped.len <= 0 {
+			return error("User not found")
+		}
 
 		ret := Player{
-			id: res["id"].int()
-			username: res["username"]
-			passhash: res["password"].bytes()
-			privileges: res["privileges"].int()
+			id: mapped[0]["id"].int()
+			username: mapped[0]["username"]
+			passhash: mapped[0]["password"].bytes()
+			privileges: mapped[0]["privileges"].int()
 		}
 		unsafe { r.free() }
 

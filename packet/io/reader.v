@@ -1,4 +1,4 @@
-module osustream
+module io
 
 import encoding.binary
 import math

@@ -3,7 +3,7 @@ module events
 import ueda
 import log
 import managers
-import osustream { make_packet }
+import packet
 
 #flag -I @VMODROOT/lib
 #flag @VMODROOT/lib/libbcrypt/bcrypt.c
@@ -41,8 +41,7 @@ pub fn handle_login(mut req ueda.Request) ([]byte, int) {
 		return req.resp_raw("".bytes()), 403
 	}
 
-	mut ret := make_packet(75, 19)
-	login_fail := make_packet(5, -1)
+	mut ret := packet.protocol()
 
 	username := data[0]
 	usafe := username.replace(" ", "_").to_lower()
@@ -50,23 +49,26 @@ pub fn handle_login(mut req ueda.Request) ([]byte, int) {
 
 	mut p := managers.get_user(usafe) or {
 		log.error(err)
-		ret << login_fail
-		return req.resp_raw(ret), 401
+		ret << packet.userid(-1)
+		ret << packet.announce(err.msg)
+		return req.resp_raw(ret), 200
 	}
 
 	p.ip = req.headers["X-Real-IP"]
 
 	if p.passhash.bytestr() !in crypt_cache {
 		if C.bcrypt_checkpw(&char(pwd.str), &char(p.passhash.bytestr().str)) != 0 {
-			ret << login_fail
-			return req.resp_raw(ret), 401
+			ret << packet.userid(-1)
+			ret << packet.announce("Login failed")
+			return req.resp_raw(ret), 200
 		}
 		crypt_cache[p.passhash.bytestr()] = pwd
 		log.info("Caching password")
 	} else {
 		if crypt_cache[p.passhash.bytestr()] != pwd {
-			ret << login_fail
-			return req.resp_raw(ret), 401
+			ret << packet.userid(-1) 
+			ret << packet.announce("Login failed")
+			return req.resp_raw(ret), 200
 		}
 
 		log.info("Using cached password")
@@ -74,6 +76,7 @@ pub fn handle_login(mut req ueda.Request) ([]byte, int) {
 
 	// login := data[2].split("|")
 
-	ret << login_fail
+	ret << packet.userid(p.id)
+	ret << packet.announce("Login successful")
 	return req.resp_raw(ret), 200
 }
