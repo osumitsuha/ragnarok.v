@@ -1,6 +1,8 @@
 module events
 
 import ueda
+import time
+import math
 import log
 import managers
 import packet
@@ -34,6 +36,9 @@ fn handle_bancho(mut req ueda.Request) ([]byte, int) {
 pub fn handle_login(mut req ueda.Request) ([]byte, int) {
 	req.headers["cho-token"] = "no"
 
+	mut sw := time.new_stopwatch()
+	sw.start()
+
 	mut data := req.body.bytestr().split("\n")
 
 	// If there is no data, it's an invalid request.
@@ -59,24 +64,35 @@ pub fn handle_login(mut req ueda.Request) ([]byte, int) {
 	if p.passhash.bytestr() !in crypt_cache {
 		if C.bcrypt_checkpw(&char(pwd.str), &char(p.passhash.bytestr().str)) != 0 {
 			ret << packet.userid(-1)
-			ret << packet.announce("Login failed")
+			ret << packet.announce("Login failed, not cached")
 			return req.resp_raw(ret), 200
 		}
 		crypt_cache[p.passhash.bytestr()] = pwd
-		log.info("Caching password")
 	} else {
 		if crypt_cache[p.passhash.bytestr()] != pwd {
 			ret << packet.userid(-1) 
-			ret << packet.announce("Login failed")
+			ret << packet.announce("Login failed, cached")
 			return req.resp_raw(ret), 200
 		}
-
-		log.info("Using cached password")
 	}
 
-	// login := data[2].split("|")
+	login := data[2].split("|")
+
+	p.osu_ver = login[0]
+
+	// if p.osu_ver != "osu!stable" {
+	// 	ret << packet.userid(-1)
+	// 	ret << packet.announce("Login failed")
+	// 	return req.resp_raw(ret), 200
+	// }
+
+	p.get_friends()
+
+	t := f64(sw.elapsed().nanoseconds()) / f64(1_000_000)
+	t_rounded := int(t*math.pow(10, 2) + .5) / math.pow(10, 2)
 
 	ret << packet.userid(p.id)
-	ret << packet.announce("Login successful")
+	ret << packet.announce("Login successful ${t_rounded}ms")
+	sw.stop()
 	return req.resp_raw(ret), 200
 }

@@ -13,4 +13,9 @@ CREATE TABLE IF NOT EXISTS `users` (
     PRIMARY KEY (`id`)
 );
 
-/* create stats */
+CREATE TABLE IF NOT EXISTS `friends` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `user_id` INT NOT NULL,
+    `friend_id` INT NOT NULL,
+    PRIMARY KEY (`id`)
+);

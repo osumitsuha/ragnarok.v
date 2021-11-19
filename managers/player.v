@@ -1,5 +1,6 @@
 module managers
 
+import rand
 import managers { Channel, Match }
 
 pub struct Player {
@@ -11,7 +12,9 @@ pub:
 pub mut:
 	passhash	[]byte	[required]
 	
-	ip			string
+	ip			string				= "127.0.0.1"
+	osu_ver		string
+	token		string
 	
 	privileges	int		[required]
 
@@ -26,7 +29,7 @@ pub mut:
 	map_id		int
 
 	channels 	[]Channel
-	friends		[]Player
+	friends		[]int
 	game_match	Match
 
 	r_score		i64
@@ -84,4 +87,18 @@ pub fn (mut p Player) initialize_stats_from_sql() ? {
 	p.p_count = result["p_score"].int()
 	p.level = result["level"].i8()
 	p.pp = result["pp"].i16()
+}
+
+pub fn (mut p Player) get_friends() {
+	r := db.query("SELECT friend_id FROM friends WHERE user_id = $p.id LIMIT 1") or { return }
+	
+	for id in r.rows() {
+		p.friends << id.vals[0].int()
+	}
+
+	unsafe { r.free() }
+}
+
+pub fn (mut p Player) generate_token() {
+	p.token = rand.uuid_v4()
 }
