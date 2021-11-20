@@ -44,12 +44,13 @@ pub fn four_o_four() []byte {
 }
 
 pub fn (u &Ueda) run() {
+
+	println(log.magneta + "~~~~~~ Running $u.name ~~~~~~" + log.endc)
+
 	mut l := net.listen_tcp(.ip, u.addr) or {
 		log.error(err)
 		return
 	}
-
-	println(log.magneta + "~~~~~~ Running $u.name ~~~~~~" + log.endc)
 
 	for {
 		mut conn := l.accept() or {
@@ -101,7 +102,5 @@ pub fn (u &Ueda) run() {
 		conn.write(req.send(code, cnt)) or {}
 		conn.close() or {}
 	}
-
-	l.close() or {}
 }
 

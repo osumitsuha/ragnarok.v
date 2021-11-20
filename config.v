@@ -1,6 +1,6 @@
 module main
   
-const (
+pub const (
     sql_pass  = "password"
     sql_username = "root"
     sql_host = "127.0.0.1"

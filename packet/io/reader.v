@@ -1,13 +1,43 @@
 module io
 
 import encoding.binary
+import objects { Player }
+import constants
+import log
 import math
 
 pub struct Reader {
 pub:
-	buffer_ []byte [required]
+	buffer_ []byte 	[required]
 pub mut:
-	pos int
+	pos 	int
+
+	pid 	i16
+	plen	int
+}
+
+pub fn (mut r Reader) next() ?Packet {
+	for {
+		if r.pos + 7 > r.buffer().len {
+			break
+		}
+		
+		r.pid = r.read_i16()
+		r.pos += 1
+		r.plen = r.read_i32()
+
+		if r.pid !in glob_packets {
+			log.warn("Unhandled packet id: $r.pid")
+
+			if r.plen != 0 {
+				r.pos += r.plen
+			}
+		} else {
+			break
+		}
+	}
+
+	return glob_packets[r.pid]
 }
 
 pub fn new_reader(data []byte) &Reader {

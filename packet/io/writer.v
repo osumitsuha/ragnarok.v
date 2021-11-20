@@ -1,6 +1,7 @@
 module io
 
 import constants { Packets }
+import math
 
 struct Stream {
 mut:
@@ -91,8 +92,6 @@ fn (mut s Stream) write_i32_l(vals []int) {
 	}
 }
 
-type PacketVal = byte | i16 | i64 | i8 | int | string | u16 | u32 | u64
-
 // io.make_packet<PacketStruct>(.packet, PacketStructData)
 pub fn make_packet<T>(packet Packets, data &T) []byte {
 	mut s := Stream{}
@@ -118,8 +117,14 @@ pub fn make_packet<T>(packet Packets, data &T) []byte {
 			s.write_u64(data.$(field.name))
 		} $else $if field.typ is i64 {
 			s.write_i64(data.$(field.name))
+		} $else $if field.typ is f32 {
+			s.write_u32(math.f32_bits(data.$(field.name)))
+		} $else $if field.typ is f64 {
+			s.write_u64(math.f64_bits(data.$(field.name)))
 		} $else $if field.typ is string {
 			s.write_str(data.$(field.name))
+		} $else $if field.typ is []int {
+			s.write_i32_l(data.$(field.name))
 		} $else {
 			panic('${field.typ} not implemented')
 		}
