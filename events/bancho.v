@@ -37,12 +37,11 @@ fn handle_bancho(mut req ueda.Request) ([]byte, int) {
 		tmp << packet.server_restart(0)
 		return req.resp_raw(tmp), 200
 	}
-
+	
 	mut r := io.new_reader(req.body)
 
 	for mut packet in r {
-		println(packet)
-		// packet.handle(mut p, mut r)
+		packet.handle(mut p, mut r)
 	}
 
 	ret := p.flush()
@@ -128,6 +127,7 @@ pub fn handle_login(mut req ueda.Request) ([]byte, int) {
 	ret << packet.announce("Login successful (${t_rounded}ms | CACHED: $is_cached)")
 	log.debug("$p.username logged in. (authorization took ${t_rounded}ms)")
 	
+	p.login_time = time.now().unix_time()
 	players[usafe] = p
 	req.headers["cho-token"] = p.token
 	return req.resp_raw(ret), 200
@@ -143,13 +143,19 @@ pub fn change_action(mut p objects.Player, mut r io.Reader) {
 	p.map_id = r.read_i32()
 
 	if !((p.privileges & int(Privileges.verified)) > 0) && 
-	   !((p.privileges & int(Privileges.pending) > 0)) {
+	   !((p.privileges & int(Privileges.pending)) > 0) {
 		objects.enqueue_players(packet.user_stats(p))
 	}
 }
 
 // id 0x02
 pub fn logout(mut p objects.Player, mut r io.Reader) {
+	_ := r.read_i32()
+
+	if time.now().unix_time() - p.login_time < 1 {
+		return
+	}
+
 	log.info("$p.username logged out.")
 }
 
@@ -157,4 +163,5 @@ pub fn request_status_update(mut p objects.Player, mut r io.Reader) {
 	p.enqueue(packet.user_stats(p))
 }
 
+// id 0x04
 pub fn pong(mut p objects.Player, mut r io.Reader) {}

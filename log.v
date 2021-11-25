@@ -10,7 +10,7 @@ pub const (
 )
 
 pub fn info(msg string) {
-	println("[$blue\info$endc]\t$msg")
+	println("[${blue}info$endc]\t$msg")
 }
 
 pub fn warn(msg string) {

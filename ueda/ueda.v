@@ -44,7 +44,6 @@ pub fn four_o_four() []byte {
 }
 
 pub fn (u &Ueda) run() {
-
 	println(log.magneta + "~~~~~~ Running $u.name ~~~~~~" + log.endc)
 
 	mut l := net.listen_tcp(.ip, u.addr) or {
@@ -60,12 +59,12 @@ pub fn (u &Ueda) run() {
 		}
 
 		mut buf := []byte{len: 1024}
-		_ := conn.read(mut buf) or {
+		pos := conn.read(mut buf) or {
 			log.error(error("Unable to read the requests body."))
 			continue
 		}
 
-		data := buf.bytestr()
+		data := buf[..pos].bytestr()
 
 		mut req := parse_request(data) or {
 			log.warn("Parsing request error: $err")

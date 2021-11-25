@@ -2,7 +2,6 @@ module io
 
 import encoding.binary
 import objects { Player }
-import constants
 import log
 import math
 
@@ -12,32 +11,25 @@ pub:
 pub mut:
 	pos 	int
 
-	pid 	i16
+	pid 	u16
 	plen	int
 }
 
 pub fn (mut r Reader) next() ?Packet {
-	for {
-		if r.pos + 7 > r.buffer().len {
-			break
-		}
-		
-		r.pid = r.read_i16()
-		r.pos += 1
-		r.plen = r.read_i32()
+	for !r.is_empty() {
+		r.read_headers()
 
 		if r.pid !in glob_packets {
 			log.warn("Unhandled packet id: $r.pid")
-
 			if r.plen != 0 {
 				r.pos += r.plen
 			}
 		} else {
-			break
+			return glob_packets[r.pid]
 		}
 	}
 
-	return glob_packets[r.pid]
+	return error('')
 }
 
 pub fn new_reader(data []byte) &Reader {
@@ -46,8 +38,16 @@ pub fn new_reader(data []byte) &Reader {
 	}
 }
 
+pub fn (r &Reader) is_empty() bool {
+	return r.pos >= r.buffer().len && r.buffer().len == 0
+}
+
 pub fn (r &Reader) buffer() []byte {
 	return r.buffer_[r.pos..]
+}
+
+pub fn (mut r Reader) read_headers() {
+	r.pid, _, r.plen = r.read_u16(), r.read_byte(), r.read_i32()
 }
 
 pub fn (mut r Reader) read_byte() u8 {
@@ -118,15 +118,11 @@ pub fn (mut r Reader) read_string() string {
 }
 
 pub fn (mut r Reader) read_f32() f32 {
-	ret := math.f32_from_bits(binary.little_endian_u32(r.buffer()[..4]))
-	r.pos += 4
-	return ret
+	return math.f32_from_bits(r.read_u32())
 }
 
 pub fn (mut r Reader) read_f64() f64 {
-	ret := math.f64_from_bits(binary.little_endian_u64(r.buffer()[..8]))
-	r.pos += 8
-	return ret
+	return math.f64_from_bits(r.read_u64())
 }
 
 pub fn (mut r Reader) read_i32_l() []int {

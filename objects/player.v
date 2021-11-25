@@ -4,50 +4,50 @@ import rand
 
 pub struct Player {
 pub:
-	id			int 	[required]
+	id				int 	[required]
 	
-	username	string 	[required]
-	usafe 		string
+	username		string 	[required]
+	usafe 			string
 
 pub mut:
-	passhash	[]byte	[required]
+	passhash		[]byte	[required]
 	
-	ip			string				= "127.0.0.1"
-	osu_ver		string
-	token		string
+	ip				string	= "127.0.0.1"
+	osu_ver			string
+	token			string
 	
-	privileges	int		[required]
+	privileges		int		[required]
 
-	country		string
-	country_c	int
+	country			string
+	country_c		int
 
-	status		string
-	status_t	int
-	map_md5		string
-	cur_mods	u32
-	mode		u8
-	map_id		int
+	status			string
+	status_t		int
+	map_md5			string
+	cur_mods		u32
+	mode			u8
+	map_id			int
 
-	channels 	[]Channel
-	friends		[]int
-	game_match	Match
+	channels 		[]Channel
+	friends			[]int
+	game_match		Match
 
-	r_score		i64
-	acc			f32
-	p_count		int
-	t_score		i64
-	level		i8
-	rank		int
-	pp			i16
+	r_score			i64
+	acc				f32
+	p_count			int
+	t_score			i64
+	level			i8
+	rank			int
+	pp				i16
 
-	relax		int
+	relax			int
 
-	queue		[]byte
+	queue			[]byte
 
-	login_time	i64
-	last_update	i64
+	login_time		i64
+	lastest_update	i64
 
-	bot			bool
+	bot				bool
 }
 
 pub fn (mut p Player) flush() []byte {

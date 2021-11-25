@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS `ragnarok`;
 
+USE `ragnarok`;
+
 CREATE TABLE IF NOT EXISTS `users` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(15) NOT NULL,
@@ -13,12 +15,11 @@ CREATE TABLE IF NOT EXISTS `users` (
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `friends` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `user_id` int(11) NOT NULL,
-    `friend_id` int(11) NOT NULL,
-    PRIMARY KEY (`id`)
-);
+INSERT INTO `users` (`username`, `usafe`, `password`, `email`, `privileges`, `country`) 
+              VALUES ('Louise', 'louise', 'no', 'louise@ragnarok.v', 254, 'DK');
+
+INSERT INTO `users` (`username`, `usafe`, `password`, `email`, `privileges`, `country`) 
+              VALUES ('Simon', 'simon', 'no', 'simon@penis.man', 254, 'DK');
 
 CREATE TABLE IF NOT EXISTS `stats` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -50,3 +51,13 @@ CREATE TABLE IF NOT EXISTS `stats` (
   `level_mania` float NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO `stats` (`id`) VALUES (1);
+INSERT INTO `stats` (`id`) VALUES (2);
+
+CREATE TABLE IF NOT EXISTS `friends` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+    `friend_id` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+);

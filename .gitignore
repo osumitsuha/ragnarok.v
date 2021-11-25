@@ -6,3 +6,4 @@ ragnarok
 *.so
 *.dylib
 *.dll
+*.log
